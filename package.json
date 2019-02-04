@@ -1,0 +1,38 @@
+{
+  "name": "@panda-clouds/parse-bash",
+  "version": "1.0.0",
+  "description": "A node helper class for accessing the hosts bash shell using promises",
+  "main": "src/PCBash.js",
+  "scripts": {
+    "pretest": "eslint .",
+    "test": "jasmine ./spec/*.spec.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/panda-clouds/parse-bash.git"
+  },
+  "keywords": [
+    "bash",
+    "parse",
+    "server",
+    "node",
+    "shell"
+  ],
+  "author": {
+    "name": "Marc Smith",
+    "email": "mr.marcsmith@me.com",
+    "url": "https://github.com/mrmarcsmith"
+  },
+  "license": "MIT",
+  "engines": {
+    "node": ">= 8"
+  },
+  "dependencies": {
+    "shelljs": "^0.8.3"
+  },
+  "devDependencies": {
+    "eslint": "^4.18.1",
+    "eslint-plugin-jasmine": "^2.10.1",
+    "jasmine": "^3.1.0"
+  }
+}
