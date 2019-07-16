@@ -95,6 +95,14 @@ describe('PCBash.putStringInFile', () => {
 		}
 	});
 
+	it('should wait await', async () => {
+		const now = new Date();
+		await PCBash.runCommandPromise('sleep 3');
+		const after = new Date();
+
+		expect((after.getTime() - now.getTime())).toBeGreaterThan(3000);
+	});
+
 	it('should handle EOF and new lines', (done) => {
 		const path = '/tmp/spec-PCBash-putStringInFile-EOF-new-lines'
 		const contents = 'EOF\nhello World\nEOF'
