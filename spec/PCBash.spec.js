@@ -67,6 +67,34 @@ describe('PCBash.putStringInFile', () => {
 			.catch(done.fail);
 	});
 
+	it('should handle numbers with await', async () => {
+		const path = '/tmp/spec-PCBash-putStringInFile-numbers-await'
+		const contents = '1234567890.'
+		const result = await PCBash.putStringInFile(contents,path)
+
+		expect(result).toBe("");
+
+		const results2 = await PCBash.runCommandPromise('cat "' + path + '"');
+
+		expect(results2).toBeDefined();
+		expect(results2).toBe(contents);
+
+		expect(path).toContain("/tmp/")
+
+		const results3 = await PCBash.runCommandPromise('rm ' + path);
+
+		expect(results3).toBeDefined();
+		expect(results3).toBe('');
+
+		try {
+			const results4 = await PCBash.runCommandPromise('cat "' + path + '"');
+			expect(true).toBe(false);
+			expect(results4).toBe('bla');
+		} catch (error) {
+			expect(error).toContain('No such file or directory');
+		}
+	});
+
 	it('should handle EOF and new lines', (done) => {
 		const path = '/tmp/spec-PCBash-putStringInFile-EOF-new-lines'
 		const contents = 'EOF\nhello World\nEOF'
