@@ -1,5 +1,8 @@
 ## PCBash Changelog
 
+### 2.0.1
+- fixed spec to run without an existing machine
+
 ### 2.0.0
 - Changed "runCommandPromise" to "run"
 - Changed "runCommandInMachinePromise" to "runInMachine"
