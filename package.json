@@ -1,11 +1,11 @@
 {
   "name": "@panda-clouds/parse-bash",
-  "version": "1.1.0",
+  "version": "2.0.0",
   "description": "A node helper class for accessing the hosts bash shell using promises",
   "main": "src/PCBash.js",
   "scripts": {
     "pretest": "eslint .",
-    "test": "jasmine ./spec/*.spec.js"
+    "test": "jest --coverage"
   },
   "repository": {
     "type": "git",
@@ -28,11 +28,13 @@
     "node": ">= 8"
   },
   "dependencies": {
-    "shelljs": "^0.8.3"
+    "execa": "^2.0.4"
   },
   "devDependencies": {
-    "eslint": "^4.18.1",
+    "@panda-clouds/docker-machine-providers": "^0.3.0",
+    "@panda-clouds/eslint-config-panda-clouds": "^0.9.0",
     "eslint-plugin-jasmine": "^2.10.1",
-    "jasmine": "^3.1.0"
+    "jest": "^24.1.0",
+    "eslint": "^5.14.1"
   }
 }
