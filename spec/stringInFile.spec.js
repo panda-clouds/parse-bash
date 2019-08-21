@@ -9,29 +9,49 @@ try {
 }
 
 describe('test docker machine', () => {
-	it('should create Digital Ocean Droplet with a name', async () => {
-		expect.assertions(12);
+	const machineName = 'ubuntu-security-string-file';
+	let machine;
 
-		// creation
-		const machineName = 'ubuntu-security-string-file';
-		const myPoem = 'the big green EOF boat floats on the sea.\n!@#$%^&*()_+=`~-0123456789 The big blue EOF plane flys in the sky\n';
-		const myPoemPath = '/root/myPoem.txt';
+	beforeAll(async () => {
 		const machinePlan = new DigitalOcean(machineName);
 
-		machinePlan.accessToken(process.env.DIGITAL_OCEAN_TOKEN);
-		machinePlan.ram('1Gb');
-		const machine = await machinePlan.createMachine();
+		const maybeCache = await machinePlan.status();
 
-		// used for quicker debugging
-		// this allows you to reuse a machine
-		// const machine = new DigitalOcean(machineName);
+		if (maybeCache === 'Running') {
+			// using cache
+			machine = machinePlan;
+		} else {
+			machinePlan.accessToken(process.env.DIGITAL_OCEAN_TOKEN);
+			machinePlan.ubuntuVersion(ubuntuVersion);
+			machinePlan.ram('1Gb');
+			machine = await machinePlan.createMachine();
+			// Checks
+			const result = await machine.status();
 
-		// try {
-		// Checks
-		const result = await machine.status();
+			if (result === 'Running') {
+				// good to go
+			} else {
+				throw new Error('test machine failed to start');
+			}
+		}
+	}, 1000 * 60 * 10);
 
-		expect(result).toBe('Running');
+	// afterAll(async () => {
+	// 	await machine.destroy();
+	// 	const destroyed = await machine.status();
 
+	// 	expect(destroyed).toBe('Machine Not Found');
+	// });
+
+	it('should create Digital Ocean Droplet with a name', async () => {
+		expect.assertions(14);
+
+		// creation
+		const myPoem = 'the big green EOF boat floats on the sea.\n!@#$%^&*()_+=`~-0123456789 The big blue EOF plane flys in the sky\n';
+		const myPoemPath = '/root/myPoem.txt';
+		const uniquePath = '/root/unique.txt';
+
+		// #########  putStringInFileOnMachine & readFileOnMachine & stringEqualsFileOnMachine & removeFileFromMachine  #########
 		await PCBash.putStringInFileOnMachine(myPoem, myPoemPath, machineName);
 
 		const readMyPoem = await PCBash.runInMachine('cat ' + myPoemPath, machineName);
@@ -63,15 +83,14 @@ describe('test docker machine', () => {
 		expect(autoReadMyPoem3).toBe('');
 
 
-		const removeResults = await PCBash.removeFileFromMachine(myPoemPath, machineName);
-
-		expect(removeResults).toBe('');
+		await PCBash.removeFileFromMachine(myPoemPath, machineName);
 
 		const autoReadMyPoem4 = await PCBash.readFileOnMachine(myPoemPath, machineName);
 
 		expect(autoReadMyPoem4).toBeNull();
 
-		// check dir
+
+		// #########  createDirectoryIfNeeded & removeDirectoryFromMachine #########
 		const path = '/tmp/my-special-dir';
 
 		await PCBash.createDirectoryIfNeeded(path, machineName);
@@ -86,9 +105,48 @@ describe('test docker machine', () => {
 
 		expect(lsResults2).not.toContain(path);
 
-		await machine.destroy();
-		const destroyed = await machine.status();
 
-		expect(destroyed).toBe('Machine Not Found');
+		// #########  addUniqueStringToFileOnMachine & readFileOnMachine #########
+
+		await PCBash.addUniqueStringToFileOnMachine('blip-bam', uniquePath, machineName);
+		const read1 = await PCBash.readFileOnMachine(uniquePath, machineName);
+
+		expect(read1).toBe('blip-bam');
+
+		// should NOT add
+		await PCBash.addUniqueStringToFileOnMachine('blip-bam', uniquePath, machineName);
+		await PCBash.addUniqueStringToFileOnMachine('blip', uniquePath, machineName);
+		await PCBash.addUniqueStringToFileOnMachine('bam', uniquePath, machineName);
+		await PCBash.addUniqueStringToFileOnMachine('p-b', uniquePath, machineName);
+
+		const read2 = await PCBash.readFileOnMachine(uniquePath, machineName);
+
+		expect(read2).toBe('blip-bam');
+
+		await PCBash.addUniqueStringToFileOnMachine('blip-bam-boom', uniquePath, machineName);
+
+
+		const read3 = await PCBash.readFileOnMachine(uniquePath, machineName);
+
+		expect(read3).toBe('blip-bam\nblip-bam-boom');
+
+		await PCBash.addUniqueStringToFileOnMachine('blip-bam-boom', uniquePath, machineName);
+
+		await PCBash.addUniqueStringToFileOnMachine('siggity-saggity-zop', uniquePath, machineName);
+
+		const read4 = await PCBash.readFileOnMachine(uniquePath, machineName);
+
+		expect(read4).toBe('blip-bam\nblip-bam-boom\nsiggity-saggity-zop');
+
+		await PCBash.removeFileFromMachine(uniquePath, machineName);
+
+		const read5 = await PCBash.readFileOnMachine(uniquePath, machineName);
+
+		expect(read5).toBeNull();
+
+		// await machine.destroy();
+		// const destroyed = await machine.status();
+
+		// expect(destroyed).toBe('Machine Not Found');
 	}, 10 * 60 * 1000);
 });

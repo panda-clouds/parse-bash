@@ -1,5 +1,8 @@
 ## PCBash Changelog
 
+### 2.1.0
+- Added "addUniqueStringToFileOnMachine" for ssh key configs
+
 ### 2.0.1
 - fixed spec to run without an existing machine
 

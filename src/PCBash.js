@@ -43,6 +43,43 @@ class PCBash {
 		return results;
 	}
 
+	static async addUniqueStringToFileOnMachine(inputFile, path, bladeId) {
+		if (!path || // Block empty variable
+			path === ''
+		) {
+			throw new Error('Invalid path parameter');
+		}
+
+		let file = inputFile;
+
+		if (typeof file !== 'string') {
+			file = JSON.stringify(file);
+		}
+
+		if (!bladeId || bladeId === '') {
+			throw new Error('Missing bladeId parameter');
+		}
+
+
+		const currentContents = await PCBash.readFileOnMachine(path, bladeId);
+
+		if (currentContents) {
+			if (currentContents.includes(file)) {
+				// the file CONTAINS the string
+				return currentContents;
+			}
+
+			// the file DOESN'T contain the string
+			// lets add it to the end of the file
+			file = currentContents + '\n' + file;
+		}
+		// we don't modify the file if it doesn't exist yet
+
+		const results = PCBash.putStringInFileOnMachine(file, path, bladeId);
+
+		return results;
+	}
+
 	static async putStringInFileOnMachine(inputFile, path, bladeId) {
 		if (!path || // Block empty variable
 			path === ''
